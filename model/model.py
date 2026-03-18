@@ -52,3 +52,4 @@ class MarketModel(Model):
         # Traders actualizan capital
         for agent in self.leveraged_traders:
             agent.update_capital()
+            agent.check_margin_call()
