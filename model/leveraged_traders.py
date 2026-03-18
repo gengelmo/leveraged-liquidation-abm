@@ -9,6 +9,7 @@ class LeveragedTrader(Agent):
         self.position = np.random.uniform(5, 15)
         self.margin_call = False
         self.margen_mantenimiento = 0.25
+        self.active = True
 
         self.prev_price = model.price
 
@@ -29,7 +30,24 @@ class LeveragedTrader(Agent):
         self.prev_price = self.model.price
 
     def check_margin_call(self):
+        # si ya no tiene posición → no participa
+        if self.position <= 1e-6:
+            self.margin_call = False
+            return
+
         if self.capital < self.margen_mantenimiento * self.value:
             self.margin_call = True
         else:
             self.margin_call = False
+    
+    def liquidate(self, theta=0.5):
+        sell_amount = theta * self.position
+
+        self.position -= sell_amount
+
+        # si ya está completamente liquidado
+        if self.position <= 0.01:
+            self.position = 0.0
+            self.active = False
+        
+        return -sell_amount

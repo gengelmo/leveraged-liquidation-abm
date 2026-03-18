@@ -10,6 +10,4 @@ class NoiseTrader(Agent):
         direction = np.random.choice([-1, 1])
         size = abs(np.random.normal(0, self.model.sigma_noise))
 
-        order = direction * size
-
-        self.model.order_flow += order
+        return direction * size

@@ -5,11 +5,16 @@ from model.leveraged_traders import LeveragedTrader
 import numpy as np
 
 class MarketModel(Model):
-    def __init__(self, N_noise=50, N_traders=20):
+    def __init__(self, N_noise=50, N_traders=50):
         super().__init__()
 
         self.price = 100.0
         self.order_flow = 0.0
+        self.order_flow_noise = 0.0
+        self.order_flow_liq = 0.0
+
+        # metricas
+        self.last_liquidations = 0.0
 
         #parametros
         self.lambda_ = 0.01
@@ -36,20 +41,40 @@ class MarketModel(Model):
         return self.lambda_ * np.sign(self.order_flow) * (abs(self.order_flow) ** self.alpha)
 
     def step(self):
-        # Generar order flow aleatorio (simulacion de mercado)
+
+        # reset
         self.order_flow = 0.0
+        self.order_flow_noise = 0.0
+        self.order_flow_liq = 0.0
+        self.last_liquidations = 0.0
 
         # Noise traders generan órdenes
         for agent in self.noise_traders:
-            agent.generate_order()
+            order = agent.generate_order()
+            self.order_flow_noise += order
 
-        # Calcular cambio de precio
+        # total order flow inicial
+        self.order_flow = self.order_flow_noise
+
+        # Actualización precio
         delta_p = self.compute_price_change()
-
-        # Actualizar precio
         self.price = self.price * np.exp(delta_p)
 
-        # Traders actualizan capital
         for agent in self.leveraged_traders:
-            agent.update_capital()
-            agent.check_margin_call()
+            if agent.active:
+                agent.update_capital()
+                agent.check_margin_call()
+
+        # Liquidaciones
+        for agent in self.leveraged_traders:
+            if agent.active and agent.margin_call:
+                order = agent.liquidate()
+                self.order_flow_liq += order
+                self.last_liquidations += abs(order)
+
+        # añadir liquidaciones al flujo total
+        self.order_flow = self.order_flow_noise + self.order_flow_liq
+
+        # Actualización de precio 
+        delta_p = self.compute_price_change()
+        self.price = self.price * np.exp(delta_p)
