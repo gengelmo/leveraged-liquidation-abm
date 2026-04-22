@@ -2,20 +2,24 @@ from mesa import Agent
 import numpy as np
 
 class LeveragedTrader(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
+    def __init__(self, unique_id, model, theta, margen_mantenimiento,
+             capital_min, capital_max,
+             position_min, position_max):
+        super().__init__(model)
+        self.unique_id = unique_id
         
-        self.capital = np.random.uniform(50, 150)
-        self.position = np.random.uniform(5, 15)
+        self.capital = np.random.uniform(capital_min, capital_max)
+        self.position = np.random.uniform(position_min, position_max)
         self.margin_call = False
-        self.margen_mantenimiento = 0.25
+        self.theta = theta
+        self.margen_mantenimiento = margen_mantenimiento
         self.active = True
 
-        self.prev_price = model.price
+        self.prev_price = model.market.price
 
     @property
     def value(self):
-        return abs(self.position * self.model.price)
+        return abs(self.position * self.model.market.price)
 
     @property
     def leverage(self):
@@ -25,12 +29,13 @@ class LeveragedTrader(Agent):
             return np.inf
 
     def update_capital(self):
-        price_change = self.model.price - self.prev_price
+        price_change = self.model.market.price - self.prev_price
         self.capital += self.position * price_change
-        self.prev_price = self.model.price
+        self.capital = max(self.capital, 0)  
+        self.prev_price = self.model.market.price
 
     def check_margin_call(self):
-        # si ya no tiene posición → no participa
+        # si ya no tiene posición -> no participa
         if self.position <= 1e-6:
             self.margin_call = False
             return
@@ -40,14 +45,15 @@ class LeveragedTrader(Agent):
         else:
             self.margin_call = False
     
-    def liquidate(self, theta=0.5):
-        sell_amount = theta * self.position
+    def liquidate(self):
+        excess_leverage = max(0, self.leverage - (1 / self.margen_mantenimiento))
+
+        sell_amount = min(self.position, self.theta * excess_leverage * self.position)
 
         self.position -= sell_amount
 
-        # si ya está completamente liquidado
-        if self.position <= 0.01:
-            self.position = 0.0
+        if self.position <= 1e-6:
+            self.position = 0
             self.active = False
-        
+
         return -sell_amount
