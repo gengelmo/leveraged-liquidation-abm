@@ -11,7 +11,6 @@ impacto de mercado no lineal, margin calls y liquidaciones forzadas.
   - `noise_traders.py`: agentes que generan ordenes aleatorias.
   - `leveraged_traders.py`: traders apalancados sujetos a margin calls.
   - `model.py`: coordinacion del mercado, agentes y metricas.
-- `app.py`: visualizacion interactiva con Mesa/Solara.
 - `web/`: demo visual en HTML, CSS y JavaScript.
 - `verify_model.py`: comprobaciones basicas del comportamiento del modelo.
 - `experiments.py`: ejecucion del analisis de sensibilidad.
