@@ -1,7 +1,0 @@
-stylized_fact,expected_pattern,model_metric,result
-Retornos poco autocorrelados,ACF returns cercana a 0,acf_returns_1 medio = 0.0100,Sí
-Clustering de volatilidad,ACF |returns| o returns² positiva,"acf_abs=-0.0069, acf_sq=-0.0053",No
-Colas pesadas / leptocurtosis,Excess kurtosis positiva y elevada,excess kurtosis media = -0.2223,No
-Drawdowns severos,Presencia de caídas grandes en algunas trayectorias,Ver distribución de max_drawdown,Sí
-Liquidaciones concentradas temporalmente,Gran parte de liquidaciones ocurre en pocos pasos,fracción media en top 10% pasos = 0.9434,Sí
-Caídas asociadas a liquidaciones,Correlación positiva entre liquidaciones y retornos negativos,"corr(liq, -returns) media = 0.2613",Sí
