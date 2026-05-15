@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leveraged Liquidation ABM</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Agent-based market simulator</p>
+        <h1>Leveraged Liquidation ABM</h1>
+        <p class="subtitle">
+          Explora como el ruido, el apalancamiento y los margin calls pueden activar ventas forzadas en cascada.
+        </p>
+      </div>
+      <div class="run-panel">
+        <button id="playPause" class="primary">Pausar</button>
+        <button id="stepOnce" class="secondary">Paso</button>
+        <button id="reset" class="secondary">Reiniciar</button>
+        <div class="speed">
+          <label for="speed">Velocidad</label>
+          <input id="speed" type="range" min="1" max="12" value="5">
+        </div>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Metricas principales">
+      <article>
+        <span>Precio</span>
+        <strong id="price">100.00</strong>
+        <small id="lastReturn">0.00%</small>
+      </article>
+      <article>
+        <span>Margin calls</span>
+        <strong id="marginCalls">0</strong>
+        <small>actuales</small>
+        <small id="marginCallsTotal">Acumulado: 0</small>
+      </article>
+
+      <article>
+        <span>Liquidaciones</span>
+        <strong id="liquidations">0.00</strong>
+        <small>volumen actual</small>
+        <small id="liquidationsTotal">Acumulado: 0.00</small>
+      </article>
+      <article>
+        <span>Apalancamiento medio</span>
+        <strong id="avgLeverage">0.00x</strong>
+        <small id="activeTraders">0 traders activos</small>
+      </article>
+    </section>
+
+    <section class="workspace">
+      <aside class="controls" aria-label="Parametros del modelo">
+        <div class="control-group">
+          <h2>Mercado</h2>
+          <label>
+            Noise traders
+            <input id="nNoise" type="range" min="10" max="1000" step="10" value="50">
+            <output>50</output>
+          </label>
+          <label>
+            Volatilidad ruido
+            <input id="sigmaNoise" type="range" min="0.1" max="2" step="0.1" value="0.5">
+            <output>0.5</output>
+          </label>
+          <label>
+            Impacto lambda
+            <input id="lambda" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+            <output>0.010</output>
+          </label>
+          <label>
+            No linealidad alpha
+            <input id="alpha" type="range" min="0.1" max="1" step="0.05" value="0.5">
+            <output>0.50</output>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <h2>Apalancados</h2>
+          <label>
+            Leveraged traders
+            <input id="nTraders" type="range" min="10" max="300" step="10" value="50">
+            <output>50</output>
+          </label>
+          <label>
+            Dispersion margen
+            <input id="marginSpread" type="range" min="0" max="0.1" step="0.01" value="0.02">
+            <output>0.02</output>
+          </label>
+          <label>
+            Escala capital
+            <input id="capitalScale" type="range" min="0.5" max="1.5" step="0.05" value="1">
+            <output>1.00</output>
+          </label>
+          <label>
+            Escala posicion
+            <input id="positionScale" type="range" min="0.1" max="0.6" step="0.05" value="0.25">
+            <output>0.25</output>
+          </label>
+        </div>
+      </aside>
+
+      <section class="dashboard">
+        <div class="chart-panel price-panel">
+          <div class="panel-heading">
+            <h2>Evolución del precio</h2>
+            <span id="stepCount">Paso 0</span>
+          </div>
+          <canvas id="priceChart" width="960" height="360"></canvas>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-panel">
+            <div class="panel-heading">
+              <h2>Cascada de liquidaciones</h2>
+              <span>barras: ventas forzadas · línea: margin calls</span>
+            </div>
+            <canvas id="liqChart" width="480" height="260"></canvas>
+          </div>
+
+          <div class="chart-panel">
+            <div class="panel-heading">
+              <h2>Fragilidad de traders</h2>
+              <span>capital vs apalancamiento</span>
+            </div>
+            <canvas id="traderMap" width="480" height="260"></canvas>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
